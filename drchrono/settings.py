@@ -117,7 +117,7 @@ STATIC_URL = '/static/'
 # 3.1) This needs to be an exact match to what the social-auth module expects
 # 3.2) change your hostname if you're using a different way to access this kiosk; by default it'll run on localhost:8080
 # 4) copy your CLIENT_ID and SECRET keys into a file docker/environment. See the example
-# 5) Ask a dev if this doesn't work quickly; these settings can be fiddly, and we'd rather not wast time with them.
+# 5) Ask a dev if this doesn't work quickly; these settings can be fiddly, and we'd rather not waste time with them.
 SOCIAL_AUTH_DRCHRONO_KEY = os.getenv('SOCIAL_AUTH_CLIENT_ID')
 SOCIAL_AUTH_DRCHRONO_SECRET = os.getenv('SOCIAL_AUTH_SECRET')
 

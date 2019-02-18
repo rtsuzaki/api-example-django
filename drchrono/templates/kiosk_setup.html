@@ -1,8 +1,7 @@
-<!DOCTYPE html>
-<html>
-  <body>
-    <a href="{% url 'social:begin' 'drchrono' %}">
-      Set up your Check-in kiosk by logging into drchrono!
-    </a>
-  </body>
-</html>
+{% extends "./base.html" %}
+{% block title %}Login{% endblock %}
+{% block body %}
+  <a href="{% url 'social:begin' 'drchrono' %}">
+    Set up your Check-in kiosk by logging into drchrono!
+  </a>
+{% endblock body %}
