@@ -3,4 +3,5 @@
 {% block body %}
     <h1>Welcome {{ doctor.first_name }} {{ doctor.last_name }}</h1>
     {{ doctor }}
+    <a href="{% url 'appointments' %}">Enter Kiosk Mode</a>
 {% endblock body %}

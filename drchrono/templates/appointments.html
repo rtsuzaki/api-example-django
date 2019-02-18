@@ -1,0 +1,22 @@
+{% extends "./base.html" %}
+{% block title %}Appointments{% endblock %}
+{% block body %}
+  <p>test test test</p>
+  
+  {% for appointment in appointments %}
+    {{ appointment }}
+    <article class="media content-section">
+      <div class="media-body">
+        <div class="article-metadata">
+          <a class="mr-2" href="#">Duration: {{ appointment.duration }}</a>
+          <small class="text-muted">Scheduled Time: {{ appointment.scheduled_time }}</small>
+        </div>
+        <h2><a class="article-title" href="#">Patient: {{ appointment.patient }}</a></h2>
+        <p class="article-content">Updated At: {{ appointment.updated_at }}</p>
+        <p class="article-content">Status: {{ appointment.status }}</p>
+        <p class="article-content">Notes: {{ appointment.notes }}</p>
+        <p class="article-content">Exam Room: {{ appointment.exam_room }}</p>
+      </div>
+    </article>
+  {% endfor %}
+{% endblock body %}

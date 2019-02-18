@@ -99,6 +99,7 @@ class BaseEndpoint(object):
         if response.ok:
             self.logger.debug("list got page {}".format('url'))
             while url:
+                print('url', url)
                 data = response.json()
                 url = data['next']  # Same as the resource URL, but with the page query parameter present
                 for result in data['results']:
