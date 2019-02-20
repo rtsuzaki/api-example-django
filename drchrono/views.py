@@ -5,6 +5,8 @@ import datetime
 
 from drchrono.endpoints import DoctorEndpoint, AppointmentEndpoint, PatientEndpoint
 from .models import Doctor, Appointment, Patient
+from .forms import CheckinForm
+from django.shortcuts import render
 
 class SetupView(TemplateView):
     """
@@ -105,16 +107,11 @@ class DoctorWelcome(TemplateView):
         doctor_details = self.make_doctor_request()
         patient_details = self.make_patient_request()
         appointments_details = self.make_appointment_request()
-        
+
         kwargs['doctor'] = doctor_details
         kwargs['appointments'] = appointments_details
         kwargs['patients'] = patient_details
         return kwargs
-
-
-
-
-
 
 class Appointments(TemplateView):
     """
@@ -155,3 +152,32 @@ class Appointments(TemplateView):
         appointments_details = self.make_api_request()
         kwargs['appointments'] = appointments_details
         return kwargs
+
+# class Checkin(TemplateView):
+#     template_name = 'checkin.html'
+
+#     def checkin_patient(request):
+#         if request.method == 'POST':
+#             form = CheckinForm(request.POST or None)
+#             if form.is_valid():
+#                 first_name = form.cleaned_data.get('first_name')
+#                 last_name = form.cleaned_data.get('last_name')
+#                 return 'Success'
+
+#     def get_context_data(self, **kwargs):
+#         kwargs = super(Checkin, self).get_context_data(**kwargs)
+#         # Hit the API using one of the endpoints just to prove that we can
+#         # If this works, then your oAuth setup is working correctly.
+#         message = self.checkin_patient('POST')
+#         kwargs['message'] = message
+#         return kwargs
+
+def checkin_patient(request):
+    form = CheckinForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            first_name = form.cleaned_data.get('first_name')
+            last_name = form.cleaned_data.get('last_name')
+            return render(request, 'kiosk_setup.html')
+
+    return render(request, 'checkin.html', {'form': form})

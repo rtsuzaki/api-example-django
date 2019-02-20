@@ -7,8 +7,8 @@ class Doctor(models.Model):
 class Patient(models.Model):
   id = models.IntegerField(primary_key=True)
   doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
-  first_name = models.CharField(max_length=20)
-  last_name = models.CharField(max_length=20)
+  first_name = models.CharField(max_length=100)
+  last_name = models.CharField(max_length=100)
   social_security_number = models.CharField(max_length=15)
   email = models.EmailField(max_length=50)
 

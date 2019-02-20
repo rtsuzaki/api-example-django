@@ -1,7 +1,9 @@
 {% extends "./base.html" %}
 {% block title %}Login{% endblock %}
 {% block body %}
-  <a href="{% url 'social:begin' 'drchrono' %}">
-    Set up your Check-in kiosk by logging into drchrono!
-  </a>
+    <!-- <a href="{% url 'social:begin' 'drchrono' %}">
+      Set up your Check-in kiosk by logging into drchrono!
+    </a> -->
+  <img src='../static/assets/doctor.svg' width=75% height=75%>
+  <button onclick="window.location.href = '{% url 'social:begin' 'drchrono' %}';" class="btn">Login to Doctor Chrono!</button>
 {% endblock body %}

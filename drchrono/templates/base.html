@@ -19,9 +19,21 @@
     <link rel="stylesheet" type="text/css" href="{% static 'main.css' %}">
 </head>
 <body>
-<div class="container">
-{% block body %}
-{% endblock %}
-</div>
+    <nav class="navbar navbar-expand-md navbar-fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="../static/assets/drchrono icon.png" width="32" height="32" alt="">
+            </a>
+            <ul class="nav nav-pills">
+                <li role="presentation" class="nav-li"><a href="{% url 'setup' %}">Doctor Dashboard</a></li>
+                <li role="presentation" class="nav-li"><a href="{% url 'checkin' %}">Patient Checkin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block body %}
+        {% endblock %}
+    </div>
 </body>
 </html>
