@@ -7,20 +7,23 @@
         <div class="article-metadata">
         <small class="text-muted">Scheduled Time: {{ appointment.scheduled_time }}</small>
         </div>
-        <h2 class="article-title">Patient: {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</h2>
-        <p class="mr-2">Duration: {{ appointment.duration }}</p>
-        <p class="article-content">Status: {{ appointment.status }}</p>
-        <p class="article-content">Notes: {{ appointment.notes }}</p>
-        <p class="article-content">Exam Room: {{ appointment.exam_room }}</p>
-        <p class="article-content">Last Updated At: {{ appointment.updated_at }}</p>
-    </div>
-    <form action="{% url 'update_status' %}" method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="status" value="Checked In"></input>  
-        <div class="form-group">
-          <button class="btn btn-outline-info" type="submit" name="appointment" value="{{ appointment.id }}">Check In</button>
+        <div class="container"></div>
+          <h2 class="article-title">Patient: {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</h2>
+          <p class="article-title">Duration: {{ appointment.duration }}</p>
+          <p class="article-content">Status: {{ appointment.status }}</p>
+          <p class="article-content">Notes: {{ appointment.notes }}</p>
+          <p class="article-content">Exam Room: {{ appointment.exam_room }}</p>
+          <p class="article-content">Last Updated At: {{ appointment.updated_at }}</p>
         </div>
-    </form>
+        <form action="{% url 'update_status' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="Checked In"></input>  
+            <div class="form-group">
+              <button class="btn btn-outline-info" type="submit" name="appointment" value="{{ appointment.id }}">Check In</button>
+            </div>
+        </form>
+    </div>
+    
   </article>
   
   {% endfor %}

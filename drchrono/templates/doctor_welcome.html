@@ -1,7 +1,7 @@
 {% extends "./base.html" %}
 {% block title %}Welcome to drchrono{% endblock %}
 {% block body %}
-    <h1>Welcome {{ doctor.first_name }} {{ doctor.last_name }}</h1>
+    <h1>Welcome, {{ doctor.first_name }} {{ doctor.last_name }}</h1>
     <!-- {{ doctor }} -->
     <h3>The average patient wait time today is: {{ avg_wait_time_today }} minutes</h3>
     {% for appointment in appointments %}
@@ -10,29 +10,33 @@
             <div class="article-metadata">
             <small class="text-muted">Scheduled Time: {{ appointment.scheduled_time }}</small>
             </div>
-            <h2 class="article-title">Patient: {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</h2>
-            <p class="mr-2">Duration: {{ appointment.duration }}</p>
-            <p class="article-content">Status: {{ appointment.status }}</p>
-            <p class="article-content">Notes: {{ appointment.notes }}</p>
-            <p class="article-content">Exam Room: {{ appointment.exam_room }}</p>
-            <p class="article-content">Last Updated At: {{ appointment.updated_at }}</p>
-            {% if appointment.status == 'Checked In' %}
-                <p class="article-content">Patient has been waiting for: {{ appointment.get_time_waiting }}</p>
-            {% endif %}
+            <h1 class="article-content">Patient: {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</h1>
+            <div class="container">
+                {% if appointment.status == 'Checked In' %}
+                    <p class="article-content">Patient has been waiting for: {{ appointment.get_time_waiting }}</p>
+                {% endif %}
+                <p class="article-content">Appointment Duration: {{ appointment.duration }} minutes</p>
+                <p class="article-content">Status: {{ appointment.status }}</p>
+                <p class="article-content">Exam Room: {{ appointment.exam_room }}</p>
+                <p class="article-content">Last Updated At: {{ appointment.updated_at }}</p>
+            </div>
+            <div class="container">
+                <form action="{% url 'update_status' %}" method="POST">
+                    {% csrf_token %}
+                    <select name="status">
+                        <option value="">Select Status Update</option>
+                        <option value="Checked In">Checked In</option>
+                        <option value="In Session">In Session</option>
+                        <option value="Complete">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <div class="form-group">
+                        <button class="btn btn-outline-info" type="submit" name="appointment" value="{{ appointment.id }}">Update Status</button>
+                    </div>
+                </form>
+            </div>
                 
-            <form action="{% url 'update_status' %}" method="POST">
-                {% csrf_token %}
-                <select name="status">
-                    <option value="">Select Status Update</option>
-                    <option value="Checked In">Checked In</option>
-                    <option value="In Session">In Session</option>
-                    <option value="Complete">Completed</option>
-                    <option value="Cancelled">Cancelled</option>
-                </select>
-                <div class="form-group">
-                    <button class="btn btn-outline-info" type="submit" name="appointment" value="{{ appointment.id }}">Update Status</button>
-                </div>
-            </form>
+            
         </div>
         </article>
         

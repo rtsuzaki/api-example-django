@@ -1,0 +1,10 @@
+{% extends "./base.html" %}
+{% block title %}Successfully Updated{% endblock %}
+{% block body %}
+  
+  <div class="container">
+    <h2>Your average wait time for all appointments completed has been: {{ avg_wait_time_all }} minutes!</h1>
+    <h2>You have completed a total of {{ total_apps_count }} appointments!</h2>
+  </div>
+
+{% endblock body %}

@@ -44,6 +44,7 @@ class DoctorWelcome(TemplateView):
         # account probably only has one doctor in it.
         doctor = next(api.list())
         doctor_obj, created = Doctor.objects.get_or_create(pk=doctor['id'])
+        
         return doctor
 
     def make_patient_request(self):
@@ -79,12 +80,12 @@ class DoctorWelcome(TemplateView):
         access_token = self.get_token()
         api = AppointmentEndpoint(access_token)
         
-        d = datetime.datetime.today()
-        
         # Converting date into DD-MM-YYYY format
+        d = datetime.datetime.today()
         current_date = (d.strftime('%Y-%m-%d'))
-        
+
         appointments_from_api = list(api.list({}, current_date))
+
         for appointment in appointments_from_api:
             appointment_obj, created = Appointment.objects.get_or_create(
                 pk=appointment['id'],
@@ -102,7 +103,6 @@ class DoctorWelcome(TemplateView):
                     'time_doctor_completed': None,
                 },
             )
-
         appointments = helpers.get_todays_appointments()
         return appointments
 
@@ -114,31 +114,11 @@ class DoctorWelcome(TemplateView):
         patient_details = self.make_patient_request()
         appointments_details = self.make_appointment_request()
         avg_wait_time_today = helpers.get_avg_wait_time_today(appointments_details)
-
         kwargs['doctor'] = doctor_details
         kwargs['appointments'] = appointments_details
         kwargs['patients'] = patient_details
         kwargs['avg_wait_time_today'] = avg_wait_time_today
         return kwargs
-
-# class Checkin(TemplateView):
-#     template_name = 'checkin.html'
-
-#     def checkin_patient(request):
-#         if request.method == 'POST':
-#             form = CheckinForm(request.POST or None)
-#             if form.is_valid():
-#                 first_name = form.cleaned_data.get('first_name')
-#                 last_name = form.cleaned_data.get('last_name')
-#                 return 'Success'
-
-#     def get_context_data(self, **kwargs):
-#         kwargs = super(Checkin, self).get_context_data(**kwargs)
-#         # Hit the API using one of the endpoints just to prove that we can
-#         # If this works, then your oAuth setup is working correctly.
-#         message = self.checkin_patient('POST')
-#         kwargs['message'] = message
-#         return kwargs
 
 def checkin_patient(request):
     form = CheckinForm(request.POST or None)
@@ -153,7 +133,7 @@ def checkin_patient(request):
             if not lookup_patient:
                 return render(request, "checkin.html", {
                     'form': form,
-                    "message": "No patient information found, "
+                    "message": "No matching patient information found, "
                     "please check first/last name and SSN again!"
                 })
 
@@ -220,3 +200,15 @@ class Arrived(TemplateView):
     Shows successful checkin page
     """
     template_name = 'arrived.html'
+
+class History(TemplateView):
+    """
+    Shows data on past appointments
+    """
+    template_name = 'history.html'
+
+    def get_context_data(self, **kwargs):
+        history_data = helpers.get_avg_wait_time_all()
+        kwargs['avg_wait_time_all'] = history_data['avg_wait']
+        kwargs['total_apps_count'] = history_data['total_apps_count']
+        return kwargs
