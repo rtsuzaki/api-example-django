@@ -1,4 +1,8 @@
 from django.db import models
+from django.utils.timesince import timesince
+import datetime
+import pytz
+
 
 # Add your models here
 class Doctor(models.Model):
@@ -22,5 +26,13 @@ class Appointment(models.Model):
   scheduled_time = models.DateTimeField(auto_now=False, auto_now_add=False)
   updated_at = models.DateTimeField(auto_now=True)
   duration = models.IntegerField(blank=True, null=True)
+  time_checkedin = models.DateTimeField(auto_now=False, auto_now_add=False, null=True)
+  time_doctor_started = models.DateTimeField(auto_now=False, auto_now_add=False, null=True)
+  time_doctor_completed = models.DateTimeField(auto_now=False, auto_now_add=False, null=True)
+  time_patient_waited = models.IntegerField(blank=True, null=True)
 
+  def get_time_waiting(self):
+    checkedin = self.time_checkedin
+    now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    return timesince(checkedin, now)
 

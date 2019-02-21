@@ -2,7 +2,7 @@ from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from social_django.models import UserSocialAuth
 import datetime
-
+import pytz
 from drchrono.endpoints import DoctorEndpoint, AppointmentEndpoint, PatientEndpoint
 from .models import Doctor, Appointment, Patient
 from .forms import CheckinForm
@@ -97,6 +97,9 @@ class DoctorWelcome(TemplateView):
                     'scheduled_time':appointment['scheduled_time'],
                     'updated_at':appointment['updated_at'],
                     'duration':appointment['duration'],
+                    'time_checkedin': None,
+                    'time_doctor_started': None,
+                    'time_doctor_completed': None,
                 },
             )
 
@@ -110,51 +113,13 @@ class DoctorWelcome(TemplateView):
         doctor_details = self.make_doctor_request()
         patient_details = self.make_patient_request()
         appointments_details = self.make_appointment_request()
+        avg_wait_time_today = helpers.get_avg_wait_time_today(appointments_details)
 
         kwargs['doctor'] = doctor_details
         kwargs['appointments'] = appointments_details
         kwargs['patients'] = patient_details
+        kwargs['avg_wait_time_today'] = avg_wait_time_today
         return kwargs
-
-# class Appointments(TemplateView):
-#     """
-#     The doctor can see what appointments they have today.
-#     """
-#     template_name = 'appointments.html'
-
-#     def get_token(self):
-#         """
-#         Social Auth module is configured to store our access tokens. This dark magic will fetch it for us if we've
-#         already signed in.
-#         """
-#         oauth_provider = UserSocialAuth.objects.get(provider='drchrono')
-#         access_token = oauth_provider.extra_data['access_token']
-#         return access_token
-
-#     def make_api_request(self):
-#         """
-#         Use the token we have stored in the DB to make an API request and get doctor details. If this succeeds, we've
-#         proved that the OAuth setup is working
-#         """
-#         # We can create an instance of an endpoint resource class, and use it to fetch details
-#         access_token = self.get_token()
-#         api = AppointmentEndpoint(access_token)
-#         # Grab the first doctor from the list; normally this would be the whole practice group, but your hackathon
-#         # account probably only has one doctor in it.
-        
-#         d = datetime.datetime.today()
-        
-#         # Converting date into DD-MM-YYYY format
-#         current_date = (d.strftime('%Y-%m-%d'))
-#         return api.list({}, current_date)
-
-#     def get_context_data(self, **kwargs):
-#         kwargs = super(Appointments, self).get_context_data(**kwargs)
-#         # Hit the API using one of the endpoints just to prove that we can
-#         # If this works, then your oAuth setup is working correctly.
-#         appointments_details = self.make_api_request()
-#         kwargs['appointments'] = appointments_details
-#         return kwargs
 
 # class Checkin(TemplateView):
 #     template_name = 'checkin.html'
@@ -206,10 +171,8 @@ def checkin_patient(request):
 
 def update_app_status(request):
     if (request.method == 'POST'):
-        # appointment = lookup_appointment_by_id(request.POST.get('appointment'))
         id = request.POST.get('appointment')
         status = request.POST.get('status')
-        print(status)
         appointment_obj, created = Appointment.objects.update_or_create(
             pk=id,
             defaults={
@@ -217,7 +180,36 @@ def update_app_status(request):
             },
         )
         if status == 'Checked In':
+            appointment_obj, created = Appointment.objects.update_or_create(
+                pk=id,
+                defaults={
+                'time_checkedin': datetime.datetime.utcnow().replace(tzinfo=pytz.utc),
+                },
+            )
             return redirect('arrived')
+        elif status == 'In Session':
+            appointment = Appointment.objects.get(pk=id)
+            now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+            time_patient_waited = round((now - appointment.time_checkedin).total_seconds()/60)
+            print(now)
+            print(appointment.time_checkedin)
+            print(time_patient_waited)
+            appointment_obj, created = Appointment.objects.update_or_create(
+                pk=id,
+                defaults={
+                'time_doctor_started': now,
+                'time_patient_waited': time_patient_waited,
+                },
+            )
+            return redirect('setup')
+        elif status == 'Complete':
+            appointment_obj, created = Appointment.objects.update_or_create(
+                pk=id,
+                defaults={
+                'time_doctor_completed': datetime.datetime.utcnow().replace(tzinfo=pytz.utc),
+                },
+            )
+            return redirect('setup')
         else:
             return redirect('setup')
 

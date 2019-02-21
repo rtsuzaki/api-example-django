@@ -9,10 +9,10 @@
         </div>
         <h2 class="article-title">Patient: {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</h2>
         <p class="mr-2">Duration: {{ appointment.duration }}</p>
-        <p class="article-content">Updated At: {{ appointment.updated_at }}</p>
         <p class="article-content">Status: {{ appointment.status }}</p>
         <p class="article-content">Notes: {{ appointment.notes }}</p>
         <p class="article-content">Exam Room: {{ appointment.exam_room }}</p>
+        <p class="article-content">Last Updated At: {{ appointment.updated_at }}</p>
     </div>
     <form action="{% url 'update_status' %}" method="POST">
         {% csrf_token %}
