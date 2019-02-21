@@ -6,7 +6,7 @@ import datetime
 from drchrono.endpoints import DoctorEndpoint, AppointmentEndpoint, PatientEndpoint
 from .models import Doctor, Appointment, Patient
 from .forms import CheckinForm
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import helpers
 
 class SetupView(TemplateView):
@@ -43,7 +43,7 @@ class DoctorWelcome(TemplateView):
         # Grab the first doctor from the list; normally this would be the whole practice group, but your hackathon
         # account probably only has one doctor in it.
         doctor = next(api.list())
-        doctor_obj, created = Doctor.objects.update_or_create(pk=doctor['id'])
+        doctor_obj, created = Doctor.objects.get_or_create(pk=doctor['id'])
         return doctor
 
     def make_patient_request(self):
@@ -58,7 +58,7 @@ class DoctorWelcome(TemplateView):
         patients = list(api.list())
         
         for patient in patients:
-            patient_obj, created = Patient.objects.update_or_create(
+            patient_obj, created = Patient.objects.get_or_create(
                 pk=patient['id'],
                 defaults={
                     'doctor': Doctor.objects.get(pk=patient['doctor']),
@@ -84,9 +84,9 @@ class DoctorWelcome(TemplateView):
         # Converting date into DD-MM-YYYY format
         current_date = (d.strftime('%Y-%m-%d'))
         
-        appointments = list(api.list({}, current_date))
-        for appointment in appointments:
-            appointment_obj, created = Appointment.objects.update_or_create(
+        appointments_from_api = list(api.list({}, current_date))
+        for appointment in appointments_from_api:
+            appointment_obj, created = Appointment.objects.get_or_create(
                 pk=appointment['id'],
                 defaults={
                     'patient':Patient.objects.get(pk=appointment['patient']),
@@ -99,6 +99,8 @@ class DoctorWelcome(TemplateView):
                     'duration':appointment['duration'],
                 },
             )
+
+        appointments = helpers.get_todays_appointments()
         return appointments
 
     def get_context_data(self, **kwargs):
@@ -180,9 +182,9 @@ def checkin_patient(request):
             first_name = form.cleaned_data.get('first_name')
             last_name = form.cleaned_data.get('last_name')
             # social_security_number = form.cleaned_data.get('social_security_number')
-            lookup_patient = helpers.lookup_patient(first_name, last_name)
 
-            # if didn't find patient info, stay the same page with error message
+            lookup_patient = helpers.lookup_patient(first_name, last_name)
+            # Display errors if did not find patient info or appointments for today
             if not lookup_patient:
                 return render(request, "checkin.html", {
                     'form': form,
@@ -191,26 +193,38 @@ def checkin_patient(request):
                 })
 
             lookup_appointment = helpers.lookup_appointment(lookup_patient)
-            # # if no appointments found today, stay the same page with error message
             if not lookup_appointment:
                 return render(request, "checkin.html", {
                     'form': form,
                     "message": "No appointments scheduled for this patient today!"
                 })
-            # if all successfully lookup, then go to select today's appointment
+
+            # Display matched appointments for patient today
             return render(request, 'appointments.html', {'appointments': lookup_appointment})
 
     return render(request, 'checkin.html', {'form': form})
 
-def select_app(request):
+def update_app_status(request):
     if (request.method == 'POST'):
         # appointment = lookup_appointment_by_id(request.POST.get('appointment'))
         id = request.POST.get('appointment')
+        status = request.POST.get('status')
+        print(status)
         appointment_obj, created = Appointment.objects.update_or_create(
             pk=id,
             defaults={
-            'status':'arrived',
+            'status': status,
             },
         )
+        if status == 'Checked In':
+            return redirect('arrived')
+        else:
+            return redirect('setup')
 
     return render(request, 'checkin.html')
+
+class Arrived(TemplateView):
+    """
+    Shows successful checkin page
+    """
+    template_name = 'arrived.html'

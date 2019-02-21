@@ -14,8 +14,9 @@
         <p class="article-content">Notes: {{ appointment.notes }}</p>
         <p class="article-content">Exam Room: {{ appointment.exam_room }}</p>
     </div>
-    <form action="{% url 'select_app' %}" method="POST">
+    <form action="{% url 'update_status' %}" method="POST">
         {% csrf_token %}
+        <input type="hidden" name="status" value="Checked In"></input>  
         <div class="form-group">
           <button class="btn btn-outline-info" type="submit" name="appointment" value="{{ appointment.id }}">Check In</button>
         </div>

@@ -1,0 +1,14 @@
+{% extends "./base.html" %}
+{% block title %}Successfully Updated{% endblock %}
+{% block body %}
+  
+  <div class="container">
+    <div>
+      <p>Successfully checked in. Your appointment status has been updated, please wait.</p>
+    </div>
+
+    <a href = "{% url 'checkin' %}"><button type="button" class="btn btn-success">Back to Kiosk</button></a>
+    
+  </div>
+
+{% endblock body %}

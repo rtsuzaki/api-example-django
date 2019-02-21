@@ -5,7 +5,6 @@
     <!-- {{ doctor }} -->
 
     {% for appointment in appointments %}
-        {{ appointment }}
         <article class="media content-section">
         <div class="media-body">
             <div class="article-metadata">
@@ -17,8 +16,22 @@
             <p class="article-content">Status: {{ appointment.status }}</p>
             <p class="article-content">Notes: {{ appointment.notes }}</p>
             <p class="article-content">Exam Room: {{ appointment.exam_room }}</p>
+            <form action="{% url 'update_status' %}" method="POST">
+                {% csrf_token %}
+                <select name="status">
+                    <option >Select Status Update</option>
+                    <option value="Checked In">Checked In</option>
+                    <option value="In Session">In Session</option>
+                    <option value="Complete">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+                <div class="form-group">
+                    <button class="btn btn-outline-info" type="submit" name="appointment" value="{{ appointment.id }}">Update Status</button>
+                </div>
+            </form>
         </div>
         </article>
+        
     {% endfor %}
 
     <a href="{% url 'checkin' %}">Enter Kiosk Mode</a>

@@ -31,3 +31,12 @@ def lookup_appointment(patient):
 
 def lookup_appointment_by_id(id):
   return Appointment.objects.filter(id=id)
+
+def get_todays_appointments():
+  d = datetime.datetime.today()
+  appointments = Appointment.objects.filter(
+    scheduled_time__year=d.year,
+    scheduled_time__month=d.month,
+    scheduled_time__day=d.day
+  ).order_by('scheduled_time')
+  return appointments
