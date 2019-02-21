@@ -51,3 +51,12 @@ body{
 select {
   margin-bottom:10px
 }
+
+.login{
+  padding:20px;
+  font-size: 24px;
+}
+
+.media{
+  padding:50px
+}
