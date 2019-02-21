@@ -7,6 +7,7 @@ from drchrono.endpoints import DoctorEndpoint, AppointmentEndpoint, PatientEndpo
 from .models import Doctor, Appointment, Patient
 from .forms import CheckinForm
 from django.shortcuts import render
+import helpers
 
 class SetupView(TemplateView):
     """
@@ -84,20 +85,22 @@ class DoctorWelcome(TemplateView):
         current_date = (d.strftime('%Y-%m-%d'))
         
         appointments = list(api.list({}, current_date))
-        
         for appointment in appointments:
+            print(appointment['status'])
             appointment_obj, created = Appointment.objects.update_or_create(
                 pk=appointment['id'],
                 defaults={
                     'patient':Patient.objects.get(pk=appointment['patient']),
                     'doctor':Doctor.objects.get(pk=appointment['doctor']),
-                    'status':appointment['status'],
                     'notes':appointment['notes'],
+                    'status':appointment['status'],
                     'exam_room':appointment['exam_room'],
                     'scheduled_time':appointment['scheduled_time'],
                     'updated_at':appointment['updated_at'],
+                    'duration':appointment['duration'],
                 },
             )
+        print('hit here')
         return appointments
 
     def get_context_data(self, **kwargs):
@@ -113,45 +116,45 @@ class DoctorWelcome(TemplateView):
         kwargs['patients'] = patient_details
         return kwargs
 
-class Appointments(TemplateView):
-    """
-    The doctor can see what appointments they have today.
-    """
-    template_name = 'appointments.html'
+# class Appointments(TemplateView):
+#     """
+#     The doctor can see what appointments they have today.
+#     """
+#     template_name = 'appointments.html'
 
-    def get_token(self):
-        """
-        Social Auth module is configured to store our access tokens. This dark magic will fetch it for us if we've
-        already signed in.
-        """
-        oauth_provider = UserSocialAuth.objects.get(provider='drchrono')
-        access_token = oauth_provider.extra_data['access_token']
-        return access_token
+#     def get_token(self):
+#         """
+#         Social Auth module is configured to store our access tokens. This dark magic will fetch it for us if we've
+#         already signed in.
+#         """
+#         oauth_provider = UserSocialAuth.objects.get(provider='drchrono')
+#         access_token = oauth_provider.extra_data['access_token']
+#         return access_token
 
-    def make_api_request(self):
-        """
-        Use the token we have stored in the DB to make an API request and get doctor details. If this succeeds, we've
-        proved that the OAuth setup is working
-        """
-        # We can create an instance of an endpoint resource class, and use it to fetch details
-        access_token = self.get_token()
-        api = AppointmentEndpoint(access_token)
-        # Grab the first doctor from the list; normally this would be the whole practice group, but your hackathon
-        # account probably only has one doctor in it.
+#     def make_api_request(self):
+#         """
+#         Use the token we have stored in the DB to make an API request and get doctor details. If this succeeds, we've
+#         proved that the OAuth setup is working
+#         """
+#         # We can create an instance of an endpoint resource class, and use it to fetch details
+#         access_token = self.get_token()
+#         api = AppointmentEndpoint(access_token)
+#         # Grab the first doctor from the list; normally this would be the whole practice group, but your hackathon
+#         # account probably only has one doctor in it.
         
-        d = datetime.datetime.today()
+#         d = datetime.datetime.today()
         
-        # Converting date into DD-MM-YYYY format
-        current_date = (d.strftime('%Y-%m-%d'))
-        return api.list({}, current_date)
+#         # Converting date into DD-MM-YYYY format
+#         current_date = (d.strftime('%Y-%m-%d'))
+#         return api.list({}, current_date)
 
-    def get_context_data(self, **kwargs):
-        kwargs = super(Appointments, self).get_context_data(**kwargs)
-        # Hit the API using one of the endpoints just to prove that we can
-        # If this works, then your oAuth setup is working correctly.
-        appointments_details = self.make_api_request()
-        kwargs['appointments'] = appointments_details
-        return kwargs
+#     def get_context_data(self, **kwargs):
+#         kwargs = super(Appointments, self).get_context_data(**kwargs)
+#         # Hit the API using one of the endpoints just to prove that we can
+#         # If this works, then your oAuth setup is working correctly.
+#         appointments_details = self.make_api_request()
+#         kwargs['appointments'] = appointments_details
+#         return kwargs
 
 # class Checkin(TemplateView):
 #     template_name = 'checkin.html'
@@ -178,6 +181,31 @@ def checkin_patient(request):
         if form.is_valid():
             first_name = form.cleaned_data.get('first_name')
             last_name = form.cleaned_data.get('last_name')
-            return render(request, 'kiosk_setup.html')
+            # social_security_number = form.cleaned_data.get('social_security_number')
+            lookup_patient = helpers.lookup_patient(first_name, last_name)
+
+            # if didn't find patient info, stay the same page with error message
+            if not lookup_patient:
+                return render(request, "checkin.html", {
+                    'form': form,
+                    "message": "No patient information found, "
+                    "please check first/last name and SSN again!"
+                })
+
+            lookup_appointment = helpers.lookup_appointment(lookup_patient)
+            # # if no appointments found today, stay the same page with error message
+            if not lookup_appointment:
+                return render(request, "checkin.html", {
+                    'form': form,
+                    "message": "No appointments scheduled for this patient today!"
+                })
+            # if all successfully lookup, then go to select today's appointment
+            return render(request, 'appointments.html', {'appointments': lookup_appointment})
 
     return render(request, 'checkin.html', {'form': form})
+
+def select_app(request):
+    print('test')
+    if (request.method == 'POST'):
+        print(request)
+    return render(request, 'checkin.html')

@@ -1,7 +1,26 @@
 {% extends "./base.html" %}
 {% block title %}Appointments{% endblock %}
 {% block body %}
-  <p>test test test</p>
+  {% for appointment in appointments %}
+  <article class="media content-section">
+    <div class="media-body">
+        <div class="article-metadata">
+        <small class="text-muted">Scheduled Time: {{ appointment.scheduled_time }}</small>
+        </div>
+        <h2 class="article-title" href="#">Patient: {{ appointment.patient }}</h2>
+        <p class="mr-2" href="#">Duration: {{ appointment.duration }}</p>
+        <p class="article-content">Updated At: {{ appointment.updated_at }}</p>
+        <p class="article-content">Status: {{ appointment.status }}</p>
+        <p class="article-content">Notes: {{ appointment.notes }}</p>
+        <p class="article-content">Exam Room: {{ appointment.exam_room }}</p>
+    </div>
+    <form action="{% url 'select_app' %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <button class="btn btn-outline-info" type="submit">Check In</button>
+        </div>
+    </form>
+  </article>
   
   {% endfor %}
 {% endblock body %}
