@@ -29,3 +29,5 @@ def lookup_appointment(patient):
   
   return appointments
 
+def lookup_appointment_by_id(id):
+  return Appointment.objects.filter(id=id)

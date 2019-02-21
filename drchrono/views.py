@@ -86,7 +86,6 @@ class DoctorWelcome(TemplateView):
         
         appointments = list(api.list({}, current_date))
         for appointment in appointments:
-            print(appointment['status'])
             appointment_obj, created = Appointment.objects.update_or_create(
                 pk=appointment['id'],
                 defaults={
@@ -100,7 +99,6 @@ class DoctorWelcome(TemplateView):
                     'duration':appointment['duration'],
                 },
             )
-        print('hit here')
         return appointments
 
     def get_context_data(self, **kwargs):
@@ -205,7 +203,14 @@ def checkin_patient(request):
     return render(request, 'checkin.html', {'form': form})
 
 def select_app(request):
-    print('test')
     if (request.method == 'POST'):
-        print(request)
+        # appointment = lookup_appointment_by_id(request.POST.get('appointment'))
+        id = request.POST.get('appointment')
+        appointment_obj, created = Appointment.objects.update_or_create(
+            pk=id,
+            defaults={
+            'status':'arrived',
+            },
+        )
+
     return render(request, 'checkin.html')
