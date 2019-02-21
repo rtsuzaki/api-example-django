@@ -3,7 +3,6 @@ from django.utils.timesince import timesince
 import datetime
 import pytz
 
-
 # Add your models here
 class Doctor(models.Model):
   id = models.IntegerField(primary_key=True)

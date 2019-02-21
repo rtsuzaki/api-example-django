@@ -5,40 +5,63 @@
     <!-- {{ doctor }} -->
     <h3>The average patient wait time today is: {{ avg_wait_time_today }} minutes</h3>
     {% for appointment in appointments %}
-        <article class="media content-section">
-        <div class="media-body">
+    <article class="content-section">
+        <div>
             <div class="article-metadata">
-            <small class="text-muted">Scheduled Time: {{ appointment.scheduled_time }}</small>
+                <small class="text-muted">Scheduled Time: {{ appointment.scheduled_time }}</small>
             </div>
-            <h1 class="article-content">Patient: {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</h1>
-            <div class="container">
-                {% if appointment.status == 'Checked In' %}
-                    <p class="article-content">Patient has been waiting for: {{ appointment.get_time_waiting }}</p>
-                {% endif %}
-                <p class="article-content">Appointment Duration: {{ appointment.duration }} minutes</p>
-                <p class="article-content">Status: {{ appointment.status }}</p>
-                <p class="article-content">Exam Room: {{ appointment.exam_room }}</p>
-                <p class="article-content">Last Updated At: {{ appointment.updated_at }}</p>
+            <div>
+                <h1 class="article-content patient">Patient: {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</h1>
             </div>
             <div class="container">
-                <form action="{% url 'update_status' %}" method="POST">
-                    {% csrf_token %}
-                    <select name="status">
-                        <option value="">Select Status Update</option>
-                        <option value="Checked In">Checked In</option>
-                        <option value="In Session">In Session</option>
-                        <option value="Complete">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
-                    </select>
-                    <div class="form-group">
-                        <button class="btn btn-outline-info" type="submit" name="appointment" value="{{ appointment.id }}">Update Status</button>
+                <div class="row patient-info">
+                    <div class="col-sm-4">
+                        <span class="article-content">Appointment Duration: </span>
+                        <span>{{ appointment.duration }} minutes</span>
                     </div>
-                </form>
-            </div>
+                    <div class="col-sm-4">
+                        <span class="article-content">Exam Room: </span>
+                        <span>{{ appointment.exam_room }}</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="article-content">Status: </span>
+                        <span> {{ appointment.status }}</span>
+                    </div>
+                </div>
+                <div class="row patient-info">
+                    <div class="col-sm-4">
+                        <span class="article-content">Patient has been waiting for: </span>
+                        {% if appointment.status == 'Checked In' %}
+                            <span>{{ appointment.get_time_waiting }}</span>
+                        {% else %}
+                            <span>0 Minutes</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="article-content">Last Updated At: </span>
+                        <span>{{ appointment.updated_at }}</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <form action="{% url 'update_status' %}" method="POST">
+                            {% csrf_token %}
+                            <select name="status">
+                                <option value="">Select Status Update</option>
+                                <option value="Checked In">Checked In</option>
+                                <option value="In Session">In Session</option>
+                                <option value="Complete">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                            <div class="form-group">
+                                <button class="btn btn-outline-info btn-primary" type="submit" name="appointment" value="{{ appointment.id }}">Update Status</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                  
                 
-            
+            </div>    
         </div>
-        </article>
+    </article>
         
     {% endfor %}
 {% endblock body %}

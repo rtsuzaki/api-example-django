@@ -146,7 +146,6 @@ def checkin_patient(request):
 
             # Display matched appointments for patient today
             return render(request, 'appointments.html', {'appointments': lookup_appointment})
-
     return render(request, 'checkin.html', {'form': form})
 
 def update_app_status(request):
@@ -171,9 +170,6 @@ def update_app_status(request):
             appointment = Appointment.objects.get(pk=id)
             now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
             time_patient_waited = round((now - appointment.time_checkedin).total_seconds()/60)
-            print(now)
-            print(appointment.time_checkedin)
-            print(time_patient_waited)
             appointment_obj, created = Appointment.objects.update_or_create(
                 pk=id,
                 defaults={
