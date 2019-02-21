@@ -10,8 +10,8 @@
             <div class="article-metadata">
             <small class="text-muted">Scheduled Time: {{ appointment.scheduled_time }}</small>
             </div>
-            <h2 class="article-title" href="#">Patient: {{ appointment.patient }}</h2>
-            <p class="mr-2" href="#">Duration: {{ appointment.duration }}</p>
+            <h2 class="article-title">Patient: {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</h2>
+            <p class="mr-2">Duration: {{ appointment.duration }}</p>
             <p class="article-content">Updated At: {{ appointment.updated_at }}</p>
             <p class="article-content">Status: {{ appointment.status }}</p>
             <p class="article-content">Notes: {{ appointment.notes }}</p>
@@ -19,7 +19,7 @@
             <form action="{% url 'update_status' %}" method="POST">
                 {% csrf_token %}
                 <select name="status">
-                    <option >Select Status Update</option>
+                    <option value="">Select Status Update</option>
                     <option value="Checked In">Checked In</option>
                     <option value="In Session">In Session</option>
                     <option value="Complete">Completed</option>
@@ -33,6 +33,4 @@
         </article>
         
     {% endfor %}
-
-    <a href="{% url 'checkin' %}">Enter Kiosk Mode</a>
 {% endblock body %}
