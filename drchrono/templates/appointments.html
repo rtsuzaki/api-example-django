@@ -28,12 +28,8 @@
               </div>
               <div class="row patient-info">
                   <div class="col-sm-4">
-                    <span class="article-content">Patient has been waiting for: </span>
-                    {% if appointment.status == 'Checked In' %}
-                      <span>{{ appointment.get_time_waiting }}</span>
-                    {% else %}
+                      <span class="article-content">Time Patient has been waiting for: </span>
                       <span>0 Minutes</span>
-                    {% endif %}
                   </div>
                   <div class="col-sm-4">
                       <span class="article-content">Last Updated At: </span>

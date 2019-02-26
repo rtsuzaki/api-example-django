@@ -1,9 +1,20 @@
 {% extends "./base.html" %}
 {% block title %}Welcome to drchrono{% endblock %}
 {% block body %}
-    <h1>Welcome, {{ doctor.first_name }} {{ doctor.last_name }}</h1>
-    <!-- {{ doctor }} -->
-    <h3>The average patient wait time today is: {{ avg_wait_time_today }} minutes</h3>
+    <div class="row">
+        <div class="col-sm-8">
+            <h1>Welcome, {{ doctor.first_name }} {{ doctor.last_name }}</h1>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8">
+                <h3>The average patient wait time today is: {{ avg_wait_time_today }} minutes</h3>
+            </div>
+        </div>
+    </div>
+    
+    
     {% for appointment in appointments %}
     <article class="content-section">
         <div>
@@ -30,10 +41,14 @@
                 </div>
                 <div class="row patient-info">
                     <div class="col-sm-4">
-                        <span class="article-content">Patient has been waiting for: </span>
                         {% if appointment.status == 'Checked In' %}
+                            <span class="article-content">Time Patient has been waiting for: </span>
                             <span>{{ appointment.get_time_waiting }}</span>
-                        {% else %}
+                        {% elif appointment.status == 'In Session' or appointment.status == 'Complete' %}
+                            <span class="article-content">Time patient waited before being seen: </span>
+                            <span>{{ appointment.get_time_waiting }}</span>
+                        {% elif appointment.status == '' %}
+                            <span class="article-content">Time Patient has been waiting for: </span>
                             <span>0 Minutes</span>
                         {% endif %}
                     </div>

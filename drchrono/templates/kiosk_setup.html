@@ -2,6 +2,5 @@
 {% block title %}Login{% endblock %}
 {% block body %}
   <img class="media" src='../static/assets/doctor.svg' width=60% height=60%>
-  <button onclick="window.location.href = '{% url 'social:begin' 'drchrono' %}';" class="btn btn-primary login">Login to Doctor Chrono!</button>
-  
+  <a href = "{% url 'social:begin' 'drchrono' %}"><button class="btn btn-primary login">Login to Doctor Chrono!</button></a>
 {% endblock body %}

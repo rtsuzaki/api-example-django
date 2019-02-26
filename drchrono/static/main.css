@@ -39,7 +39,7 @@ body{
 
 .patient{
   padding: 10px 20px;
-  /* border: 1px solid #dddddd; */
+  border: 1px solid #dddddd;
   background:white;
   border-radius: 10px;
 }

@@ -33,12 +33,11 @@ def lookup_appointment(patient):
 def lookup_appointment_by_id(id):
   return Appointment.objects.filter(id=id)
 
-def get_todays_appointments():
-  d = datetime.datetime.today()
+def get_todays_appointments(today):
   appointments = Appointment.objects.filter(
-    scheduled_time__year=d.year,
-    scheduled_time__month=d.month,
-    scheduled_time__day=d.day
+    scheduled_time__year=today.year,
+    scheduled_time__month=today.month,
+    scheduled_time__day=today.day
   ).order_by('scheduled_time')
   return appointments
 
@@ -54,9 +53,12 @@ def get_avg_wait_time_today(appointments):
       time += now - time_checkedin
     if appointment.status == 'Complete' or appointment.status == 'In Session':
       time += time_doctor_started - time_checkedin
-    
+  if (count == 0):
+    return 0
+  else:
     # Calculate average appointment time in minutes, rounded to nearest minute
-  return round(time.total_seconds()/60/count)
+    return round(time.total_seconds()/60/count)
+  
       
 def get_avg_wait_time_all():
   appointments = Appointment.objects.filter(
@@ -68,6 +70,7 @@ def get_avg_wait_time_all():
 
   for appointment in appointments:
     time += appointment.time_doctor_started - appointment.time_checkedin
+    
   avg_wait_time_all = round(time.total_seconds()/60/len(appointments))
   
   history_data = {

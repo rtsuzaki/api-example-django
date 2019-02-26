@@ -81,8 +81,8 @@ class DoctorWelcome(TemplateView):
         api = AppointmentEndpoint(access_token)
         
         # Converting date into DD-MM-YYYY format
-        d = datetime.datetime.today()
-        current_date = (d.strftime('%Y-%m-%d'))
+        date = datetime.datetime.today()
+        current_date = (date.strftime('%Y-%m-%d'))
 
         appointments_from_api = list(api.list({}, current_date))
 
@@ -103,7 +103,7 @@ class DoctorWelcome(TemplateView):
                     'time_doctor_completed': None,
                 },
             )
-        appointments = helpers.get_todays_appointments()
+        appointments = helpers.get_todays_appointments(date)
         return appointments
 
     def get_context_data(self, **kwargs):
@@ -118,6 +118,24 @@ class DoctorWelcome(TemplateView):
         kwargs['appointments'] = appointments_details
         kwargs['patients'] = patient_details
         kwargs['avg_wait_time_today'] = avg_wait_time_today
+        return kwargs
+
+class Arrived(TemplateView):
+    """
+    Shows successful checkin page
+    """
+    template_name = 'arrived.html'
+
+class History(TemplateView):
+    """
+    Shows data on past appointments
+    """
+    template_name = 'history.html'
+
+    def get_context_data(self, **kwargs):
+        history_data = helpers.get_avg_wait_time_all()
+        kwargs['avg_wait_time_all'] = history_data['avg_wait']
+        kwargs['total_apps_count'] = history_data['total_apps_count']
         return kwargs
 
 def checkin_patient(request):
@@ -149,19 +167,14 @@ def checkin_patient(request):
     return render(request, 'checkin.html', {'form': form})
 
 def update_app_status(request):
-    if (request.method == 'POST'):
+    if request.method == 'POST':
         id = request.POST.get('appointment')
         status = request.POST.get('status')
-        appointment_obj, created = Appointment.objects.update_or_create(
-            pk=id,
-            defaults={
-            'status': status,
-            },
-        )
         if status == 'Checked In':
             appointment_obj, created = Appointment.objects.update_or_create(
                 pk=id,
                 defaults={
+                'status': status,
                 'time_checkedin': datetime.datetime.utcnow().replace(tzinfo=pytz.utc),
                 },
             )
@@ -173,6 +186,7 @@ def update_app_status(request):
             appointment_obj, created = Appointment.objects.update_or_create(
                 pk=id,
                 defaults={
+                'status': status,
                 'time_doctor_started': now,
                 'time_patient_waited': time_patient_waited,
                 },
@@ -182,6 +196,7 @@ def update_app_status(request):
             appointment_obj, created = Appointment.objects.update_or_create(
                 pk=id,
                 defaults={
+                'status': status,
                 'time_doctor_completed': datetime.datetime.utcnow().replace(tzinfo=pytz.utc),
                 },
             )
@@ -190,21 +205,3 @@ def update_app_status(request):
             return redirect('setup')
 
     return render(request, 'checkin.html')
-
-class Arrived(TemplateView):
-    """
-    Shows successful checkin page
-    """
-    template_name = 'arrived.html'
-
-class History(TemplateView):
-    """
-    Shows data on past appointments
-    """
-    template_name = 'history.html'
-
-    def get_context_data(self, **kwargs):
-        history_data = helpers.get_avg_wait_time_all()
-        kwargs['avg_wait_time_all'] = history_data['avg_wait']
-        kwargs['total_apps_count'] = history_data['total_apps_count']
-        return kwargs
