@@ -40,7 +40,7 @@
                       <span>{{ appointment.updated_at }}</span>
                   </div>
                   <div class="col-sm-4">
-                      <form action="{% url 'update_status' %}" method="POST">
+                      <form action="{% url 'setup' %}" method="POST">
                           {% csrf_token %}
                           <input type="hidden" name="status" value="Checked In"></input>  
                           <div class="form-group">

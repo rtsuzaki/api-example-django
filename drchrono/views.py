@@ -1,4 +1,5 @@
 from django.shortcuts import redirect
+from django.views import View
 from django.views.generic import TemplateView
 from social_django.models import UserSocialAuth
 import datetime
@@ -40,24 +41,30 @@ class DoctorWelcome(TemplateView):
         # We can create an instance of an endpoint resource class, and use it to fetch details
         access_token = self.get_token()
         api = DoctorEndpoint(access_token)
+
         # Grab the first doctor from the list; normally this would be the whole practice group, but your hackathon
         # account probably only has one doctor in it.
         doctor = next(api.list())
-        doctor_obj, created = Doctor.objects.get_or_create(pk=doctor['id'])
-        
-        return doctor
+
+        # Add doctor to local database if does not exist yet
+        doctor_obj, created = Doctor.objects.get_or_create(
+            pk=doctor['id'],
+            defaults={
+                'first_name': doctor['first_name'],
+                'last_name': doctor['last_name'],
+            },
+        )
+
+        return doctor_obj
 
     def make_patient_request(self):
-        """
-        Use the token we have stored in the DB to make an API request and get doctor details. If this succeeds, we've
-        proved that the OAuth setup is working
-        """
         # We can create an instance of an endpoint resource class, and use it to fetch details
         access_token = self.get_token()
         api = PatientEndpoint(access_token)
         
         patients = list(api.list())
         
+        # Add patient to local database if does not exist yet
         for patient in patients:
             patient_obj, created = Patient.objects.get_or_create(
                 pk=patient['id'],
@@ -69,13 +76,8 @@ class DoctorWelcome(TemplateView):
                     'email': patient['email'],
                 },
             )
-        return patients
 
     def make_appointment_request(self):
-        """
-        Use the token we have stored in the DB to make an API request and get doctor details. If this succeeds, we've
-        proved that the OAuth setup is working
-        """
         # We can create an instance of an endpoint resource class, and use it to fetch details
         access_token = self.get_token()
         api = AppointmentEndpoint(access_token)
@@ -86,6 +88,7 @@ class DoctorWelcome(TemplateView):
 
         appointments_from_api = list(api.list({}, current_date))
 
+        # Add appointment to local database if does not exist yet
         for appointment in appointments_from_api:
             appointment_obj, created = Appointment.objects.get_or_create(
                 pk=appointment['id'],
@@ -103,71 +106,11 @@ class DoctorWelcome(TemplateView):
                     'time_doctor_completed': None,
                 },
             )
-        appointments = helpers.get_todays_appointments(date)
+        status_query = self.request.GET.get('query')
+        appointments = helpers.get_todays_appointments(date, status_query)
         return appointments
 
-    def get_context_data(self, **kwargs):
-        kwargs = super(DoctorWelcome, self).get_context_data(**kwargs)
-        # Hit the API using one of the endpoints just to prove that we can
-        # If this works, then your oAuth setup is working correctly.
-        doctor_details = self.make_doctor_request()
-        patient_details = self.make_patient_request()
-        appointments_details = self.make_appointment_request()
-        avg_wait_time_today = helpers.get_avg_wait_time_today(appointments_details)
-        kwargs['doctor'] = doctor_details
-        kwargs['appointments'] = appointments_details
-        kwargs['patients'] = patient_details
-        kwargs['avg_wait_time_today'] = avg_wait_time_today
-        return kwargs
-
-class Arrived(TemplateView):
-    """
-    Shows successful checkin page
-    """
-    template_name = 'arrived.html'
-
-class History(TemplateView):
-    """
-    Shows data on past appointments
-    """
-    template_name = 'history.html'
-
-    def get_context_data(self, **kwargs):
-        history_data = helpers.get_avg_wait_time_all()
-        kwargs['avg_wait_time_all'] = history_data['avg_wait']
-        kwargs['total_apps_count'] = history_data['total_apps_count']
-        return kwargs
-
-def checkin_patient(request):
-    form = CheckinForm(request.POST or None)
-    if request.method == 'POST':
-        if form.is_valid():
-            first_name = form.cleaned_data.get('first_name')
-            last_name = form.cleaned_data.get('last_name')
-            # social_security_number = form.cleaned_data.get('social_security_number')
-
-            lookup_patient = helpers.lookup_patient(first_name, last_name)
-            # Display errors if did not find patient info or appointments for today
-            if not lookup_patient:
-                return render(request, "checkin.html", {
-                    'form': form,
-                    "message": "No matching patient information found, "
-                    "please check first/last name and SSN again!"
-                })
-
-            lookup_appointment = helpers.lookup_appointment(lookup_patient)
-            if not lookup_appointment:
-                return render(request, "checkin.html", {
-                    'form': form,
-                    "message": "No appointments scheduled for this patient today!"
-                })
-
-            # Display matched appointments for patient today
-            return render(request, 'appointments.html', {'appointments': lookup_appointment})
-    return render(request, 'checkin.html', {'form': form})
-
-def update_app_status(request):
-    if request.method == 'POST':
+    def post(self, request):
         id = request.POST.get('appointment')
         status = request.POST.get('status')
         if status == 'Checked In':
@@ -201,7 +144,87 @@ def update_app_status(request):
                 },
             )
             return redirect('setup')
-        else:
+        elif status == '':
+            appointment_obj, created = Appointment.objects.update_or_create(
+                pk=id,
+                defaults={
+                'status': status,
+                 'time_checkedin':None,
+                'time_doctor_started': None,
+                'time_doctor_completed': None,
+                },
+            )
             return redirect('setup')
 
-    return render(request, 'checkin.html')
+    def get_context_data(self, **kwargs):
+        kwargs = super(DoctorWelcome, self).get_context_data(**kwargs)
+        doctor_details = self.make_doctor_request()
+        patient_details = self.make_patient_request()
+
+        appointments_details = self.make_appointment_request()
+
+        avg_wait_time_today = helpers.get_avg_wait_time_today(appointments_details)
+        kwargs['doctor'] = doctor_details
+        kwargs['appointments'] = appointments_details
+        kwargs['avg_wait_time_today'] = avg_wait_time_today
+        return kwargs
+
+class Arrived(TemplateView):
+    """
+    Shows successful checkin page
+    """
+    template_name = 'arrived.html'
+
+class History(TemplateView):
+    """
+    Shows data on past appointments
+    """
+    template_name = 'history.html'
+
+    def get_context_data(self, **kwargs):
+        history_data = helpers.get_avg_wait_time_all()
+        kwargs['avg_wait_time_all'] = history_data['avg_wait']
+        kwargs['total_apps_count'] = history_data['total_apps_count']
+        return kwargs
+
+class Seen(TemplateView):
+    template_name = 'doctor_welcome.html'
+
+
+class Unseen(TemplateView):
+    template_name = 'doctor_welcome.html'
+
+class Checkin(TemplateView):
+    form_class = CheckinForm
+    template_name = 'checkin.html'
+
+    def get(self, request):
+        form = self.form_class
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = CheckinForm(request.POST or None)
+        if form.is_valid():
+            first_name = form.cleaned_data.get('first_name')
+            last_name = form.cleaned_data.get('last_name')
+            # social_security_number = form.cleaned_data.get('social_security_number')
+
+            patient_lookup = helpers.lookup_patient(first_name, last_name)
+            # Display errors if did not find patient info or appointments for today
+            if not patient_lookup:
+                return render(request, self.template_name, {
+                    'form': form,
+                    "message": "No matching patient information found, "
+                    "please check first/last name and SSN again!"
+                })
+
+            appointment_lookup = helpers.lookup_appointment(patient_lookup)
+
+            if not appointment_lookup:
+                return render(request, self.template_name, {
+                    'form': form,
+                    "message": "No appointments scheduled for this patient today!"
+                })
+
+            # Display matched appointments for patient today
+            return render(request, 'appointments.html', {'appointments': appointment_lookup})

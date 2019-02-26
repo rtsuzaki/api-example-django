@@ -33,13 +33,26 @@ def lookup_appointment(patient):
 def lookup_appointment_by_id(id):
   return Appointment.objects.filter(id=id)
 
-def get_todays_appointments(today):
+def get_todays_appointments(today, status):
   appointments = Appointment.objects.filter(
     scheduled_time__year=today.year,
     scheduled_time__month=today.month,
-    scheduled_time__day=today.day
+    scheduled_time__day=today.day,
   ).order_by('scheduled_time')
-  return appointments
+  if status == None:
+    return appointments
+
+  if status == 'seen':
+    appointments = appointments.filter(
+      Q(status='In Session') | Q(status='Completed'),
+    ).order_by('scheduled_time')
+    return appointments
+
+  if status == 'unseen':
+    appointments = appointments.filter(
+      Q(status='') | Q(status='Checked In'),
+    ).order_by('scheduled_time')
+    return appointments
 
 def get_avg_wait_time_today(appointments):
   count = 0

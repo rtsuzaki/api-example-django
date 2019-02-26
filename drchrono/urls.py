@@ -9,10 +9,11 @@ import views
 urlpatterns = [
     url(r'^setup/$', views.SetupView.as_view(), name='setup'),
     url(r'^welcome/$', views.DoctorWelcome.as_view(), name='setup'),
-    url(r'^checkin/$', views.checkin_patient, name='checkin'),
-    url(r'^selected/$', views.update_app_status, name='update_status'),
+    url(r'^checkin/$', views.Checkin.as_view(), name='checkin'),
     url(r'^arrived/$', views.Arrived.as_view(), name='arrived'),
     url(r'^history/$', views.History.as_view(), name='history'),
+    url(r'^seen/$', views.Seen.as_view(), name='seen'),
+    url(r'^unseen/$', views.Unseen.as_view(), name='unseen'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'', include('social.apps.django_app.urls', namespace='social')),
 ]

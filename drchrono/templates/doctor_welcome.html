@@ -11,6 +11,11 @@
             <div class="col-sm-8">
                 <h3>The average patient wait time today is: {{ avg_wait_time_today }} minutes</h3>
             </div>
+            <div class = "col-sm-4">
+                <button value="unseen"><a href="{% url 'setup' %}?query=unseen">Appointments To See</a></button>
+                <button value="seen"><a href="{% url 'setup' %}?query=seen">Appointments Seen</a></button>
+                <button><a href="{% url 'setup' %}">All Appointments</a></button>
+            </div>
         </div>
     </div>
     
@@ -61,7 +66,7 @@
                         <span>{{ appointment.updated_at }}</span>
                     </div>
                     <div class="col-sm-4">
-                        <form action="{% url 'update_status' %}" method="POST">
+                        <form action="{% url 'setup' %}" method="POST">
                             {% csrf_token %}
                             <select name="status">
                                 <option value="">Select Status Update</option>

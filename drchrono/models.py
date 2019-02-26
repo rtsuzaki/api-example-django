@@ -3,9 +3,10 @@ from django.utils.timesince import timesince
 import datetime
 import pytz
 
-# Add your models here
 class Doctor(models.Model):
   id = models.IntegerField(primary_key=True)
+  first_name = models.CharField(max_length=100, null=True)
+  last_name = models.CharField(max_length=100, null=True)
 
 class Patient(models.Model):
   id = models.IntegerField(primary_key=True)
