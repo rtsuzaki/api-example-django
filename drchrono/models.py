@@ -110,7 +110,7 @@ class AppointmentManager(models.Manager):
       return appointments
     elif status == 'seen':
       appointments = appointments.filter(
-        models.Q(status='In Session') | models.Q(status='Completed'),
+        models.Q(status='In Session') | models.Q(status='Complete'),
       ).order_by('scheduled_time')
       return appointments
     elif status == 'unseen':
@@ -121,7 +121,7 @@ class AppointmentManager(models.Manager):
   
   def get_avg_wait_time_all(self):
     appointments = Appointment.objects.filter(
-      models.Q(status='In Session') | models.Q(status='Completed')
+      models.Q(status='In Session') | models.Q(status='Complete')
     )
     time = datetime.timedelta(minutes=0)
     if len(appointments) == 0:
