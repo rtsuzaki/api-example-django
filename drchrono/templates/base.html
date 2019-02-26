@@ -19,17 +19,16 @@
     <link rel="stylesheet" type="text/css" href="{% static 'main.css' %}">
 </head>
 <body>
-    <nav class="navbar navbar-expand-md navbar-fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'setup' %}">
-                <img src="../static/assets/drchrono icon.png" width="32" height="32" alt="">
+    <nav class="navbar nav navbar-expand-md navbar-fixed-top">
+        
+            <a href="{% url 'setup' %}">
+                <img class="drchrono-logo" src="../static/assets/drchrono icon.png" width="32" height="32" alt="">
             </a>
-            <ul class="nav nav-pills">
-                <li role="presentation" class="nav-li"><a href="{% url 'setup' %}">Doctor Dashboard</a></li>
-                <li role="presentation" class="nav-li"><a href="{% url 'checkin' %}">Patient Checkin</a></li>
-                <li role="presentation" class="nav-li"><a href="{% url 'history' %}">Historical Data</a></li>
+            <ul class="nav-test">
+                <li class="nav-item"><a class="nav-link" href="{% url 'setup' %}">Doctor Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'checkin' %}">Patient Checkin</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'history' %}">Historical Data</a></li>
             </ul>
-        </div>
     </nav>
 
     <div class="container">

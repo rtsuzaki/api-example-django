@@ -1,17 +1,36 @@
 .navbar {
-  background: #4f7395
+  background: #4f7395;
+  height: 75px;
 }
 
-.navbar-brand{
-  padding:10px
+.nav-test {
+  display: inline-block;
+  margin:0px;
+  padding:0px;
 }
 
-.nav-li{
-  background:#faf6ed
+.drchrono-logo {
+  margin:20px;
+  display:inline-block;
+}
+
+.nav-item {
+  display: inline-block;
+}
+
+.nav-link {
+  background:#FFFFFF;
+  display: inline-block;
+  padding:20px;
+}
+
+.nav-link:hover {
+  cursor:pointer;
+  background:#f4f4f4;
 }
 
 body{
-  padding-top:75px
+  padding-top:100px
 }
 
 .content-section {
@@ -40,7 +59,7 @@ body{
 .patient{
   padding: 10px 20px;
   border: 1px solid #dddddd;
-  background:white;
+  background:#FFFFFF;
   border-radius: 10px;
 }
 

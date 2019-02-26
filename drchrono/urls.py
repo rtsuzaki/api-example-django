@@ -8,6 +8,7 @@ import views
 
 urlpatterns = [
     url(r'^setup/$', views.SetupView.as_view(), name='setup'),
+    url(r'^$', views.SetupView.as_view(), name='setup'),
     url(r'^welcome/$', views.DoctorWelcome.as_view(), name='setup'),
     url(r'^checkin/$', views.Checkin.as_view(), name='checkin'),
     url(r'^arrived/$', views.Arrived.as_view(), name='arrived'),

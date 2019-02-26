@@ -17,7 +17,6 @@ class SetupView(TemplateView):
     """
     template_name = 'kiosk_setup.html'
 
-
 class DoctorWelcome(TemplateView):
     """
     Get today's appointments and store appointments and patients in database.
@@ -184,9 +183,9 @@ class Checkin(TemplateView):
                     'form': form,
                     "message": "No appointments scheduled for this patient today!"
                 })
-
-            # Display matched appointments for patient today
+                
             return render(request, 'appointments.html', {'appointments': appointment_lookup})
+
         else:
             return render(request, self.template_name, {'form': form})
     
