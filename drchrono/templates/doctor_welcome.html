@@ -36,7 +36,11 @@
                     </div>
                     <div class="col-sm-4">
                         <span class="article-content">Status: </span>
-                        <span> {{ appointment.status }}</span>
+                        {% if appointment.status == '' %}
+                            <span>Patient has not checked in yet</span>
+                        {% else %} 
+                            <span> {{ appointment.status }}</span>
+                        {% endif %}  
                     </div>
                 </div>
                 <div class="row patient-info">
