@@ -34,28 +34,38 @@ class PatientManager(models.Manager):
       },
     )
 
-  def lookup_patient(self, first_name, last_name):
-    if not Patient.objects.filter(
-      # doctor=doctor,
-      first_name=first_name,
-      last_name=last_name,
-    ).exists():
-      # social_security_number=social_security_number).exists():
-      return None
-
-    return Patient.objects.get(
-      # doctor=doctor,
-      first_name=first_name,
-      last_name=last_name
-    )
-      # social_security_number=ssn)
+  def lookup_patient(self, first_name, last_name, social_security_number):
+    if social_security_number == '':
+      if not Patient.objects.filter(
+        first_name=first_name,
+        last_name=last_name,
+      ).exists():
+        return None
+      else:
+        return Patient.objects.get(
+          first_name=first_name,
+          last_name=last_name,
+        )
+    else:   
+      if not Patient.objects.filter(
+        first_name=first_name,
+        last_name=last_name,
+        social_security_number=social_security_number,
+      ).exists():
+        return None
+      else:
+        return Patient.objects.get(
+          first_name=first_name,
+          last_name=last_name,
+          social_security_number=social_security_number,
+        )
   
 class Patient(models.Model):
   id = models.IntegerField(primary_key=True)
   doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
   first_name = models.CharField(max_length=100)
   last_name = models.CharField(max_length=100)
-  social_security_number = models.CharField(max_length=15)
+  social_security_number = models.CharField(max_length=15, blank=True)
   email = models.EmailField(max_length=50)
 
   objects = PatientManager()

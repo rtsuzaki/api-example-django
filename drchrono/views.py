@@ -163,11 +163,11 @@ class Checkin(TemplateView):
     def post(self, request):
         form = CheckinForm(request.POST or None)
         if form.is_valid():
-            first_name = form.cleaned_data.get('first_name')
-            last_name = form.cleaned_data.get('last_name')
-            # social_security_number = form.cleaned_data.get('social_security_number')
+            first_name = form.cleaned_data.get('first_name').capitalize()
+            last_name = form.cleaned_data.get('last_name').capitalize()
+            social_security_number = form.cleaned_data.get('social_security_number')
 
-            patient_lookup = Patient.objects.lookup_patient(first_name, last_name)
+            patient_lookup = Patient.objects.lookup_patient(first_name, last_name, social_security_number)
             # Display errors if did not find patient info or appointments for today
             if not patient_lookup:
                 return render(request, self.template_name, {
@@ -187,6 +187,8 @@ class Checkin(TemplateView):
 
             # Display matched appointments for patient today
             return render(request, 'appointments.html', {'appointments': appointment_lookup})
+        else:
+            return render(request, self.template_name, {'form': form})
     
     def get_context_data(self, **kwargs):
         kwargs = super(Checkin, self).get_context_data(**kwargs)
