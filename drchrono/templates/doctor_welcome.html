@@ -9,12 +9,12 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-8">
-                <h3>The average patient wait time today is: {{ avg_wait_time_today }} minutes</h3>
+                <h3>Avg. Wait Time for These Appointments: {{ avg_wait_time_today }} Minutes</h3>
             </div>
             <div class = "col-sm-4">
-                <button value="unseen"><a href="{% url 'setup' %}?query=unseen">Appointments To See</a></button>
-                <button value="seen"><a href="{% url 'setup' %}?query=seen">Appointments Seen</a></button>
-                <button><a href="{% url 'setup' %}">All Appointments</a></button>
+                <button className="btn btn-primary"><a href="{% url 'setup' %}?query=unseen">Appts. To See</a></button>
+                <button className="btn btn-primary"><a href="{% url 'setup' %}?query=seen">Appts. Seen</a></button>
+                <button className="btn btn-primary"><a href="{% url 'setup' %}">All Appts.</a></button>
             </div>
         </div>
     </div>
